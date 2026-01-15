@@ -331,6 +331,44 @@
             inputs.forEach(input => input.checked = !allChecked);
         }
 
+        // 台灣身分證字號驗證函數
+        function validateTaiwanId(id) {
+            // 檢查格式：1個英文字母 + 9個數字
+            if (!/^[A-Za-z][12]\d{8}$/.test(id)) {
+                return false;
+            }
+
+            // 字母對應的數字表
+            const letterMap = {
+                'A': 10, 'B': 11, 'C': 12, 'D': 13, 'E': 14, 'F': 15, 'G': 16, 'H': 17,
+                'I': 34, 'J': 18, 'K': 19, 'L': 20, 'M': 21, 'N': 22, 'O': 35, 'P': 23,
+                'Q': 24, 'R': 25, 'S': 26, 'T': 27, 'U': 28, 'V': 29, 'W': 32, 'X': 30,
+                'Y': 31, 'Z': 33
+            };
+
+            const firstLetter = id.charAt(0).toUpperCase();
+            const letterValue = letterMap[firstLetter];
+            if (!letterValue) return false;
+
+            // 計算驗證碼
+            const n1 = Math.floor(letterValue / 10);
+            const n2 = letterValue % 10;
+
+            const weights = [1, 9, 8, 7, 6, 5, 4, 3, 2, 1];
+            const digits = [n1, n2];
+
+            for (let i = 1; i < 10; i++) {
+                digits.push(parseInt(id.charAt(i)));
+            }
+
+            let sum = 0;
+            for (let i = 0; i < digits.length; i++) {
+                sum += digits[i] * weights[i];
+            }
+
+            return sum % 10 === 0;
+        }
+
         // 提交功能
         function submitData() {
             const vendorName = document.getElementById('vendorName').value.trim();
@@ -343,7 +381,36 @@
             const contactId = document.getElementById('contactId').value.trim();
             const disabilityItems = document.getElementById('disabilityItems').value.trim();
 
-            if (!vendorName) return alert("請填寫廠商名稱！");
+            // ====== 必填欄位驗證 ======
+            if (!vendorName) return alert("請填寫「廠商/公司名稱」！");
+            if (!assistiveItem) return alert("請填寫「輔具項目」！");
+            if (!taxId) return alert("請填寫「統一編號」！");
+            if (!phone) return alert("請填寫「電話」！");
+            if (!email) return alert("請填寫「信箱」！");
+            if (!address) return alert("請填寫「地址」！");
+            if (!contactName) return alert("請填寫「負責人姓名」！");
+            if (!contactId) return alert("請填寫「負責人身份證字號」！");
+            if (!disabilityItems) return alert("請填寫「提供身障輔具項目」！");
+
+            // ====== 統一編號驗證（8位純數字）======
+            if (!/^\d{8}$/.test(taxId)) {
+                return alert("「統一編號」格式錯誤！\n請輸入8位數字。");
+            }
+
+            // ====== 電話格式驗證（數字-數字）======
+            if (!/^\d+-\d+$/.test(phone)) {
+                return alert("「電話」格式錯誤！\n請使用「數字-數字」格式，例如：02-12345678");
+            }
+
+            // ====== 信箱格式驗證（需包含@）======
+            if (!email.includes('@') || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                return alert("「信箱」格式錯誤！\n請輸入有效的電子信箱地址。");
+            }
+
+            // ====== 台灣身分證字號驗證 ======
+            if (!validateTaiwanId(contactId)) {
+                return alert("「負責人身份證字號」格式錯誤！\n請輸入有效的台灣身分證字號。");
+            }
 
             // 檢查使用者是否已經替換網址
             if (scriptURL.includes("您的網址")) {
@@ -356,7 +423,8 @@
                 allItems.push(cb.value);
             });
 
-            if (allItems.length === 0) return alert("您尚未勾選任何項目！");
+            // ====== 勾選項目驗證（至少勾選一個）======
+            if (allItems.length === 0) return alert("請至少勾選一個項目！");
 
             const btn = document.getElementById('submitBtn');
             const loader = document.getElementById('loader');
