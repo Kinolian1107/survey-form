@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>長照輔具供應項目調查表</title>
+    <style>
+        /* 樣式設定區域 (CSS) - 您不需要修改這裡 */
+        :root { --primary: #0284c7; --bg: #f0f9ff; --border: #e2e8f0; }
+        body { font-family: "Microsoft JhengHei", sans-serif; background: var(--bg); padding: 20px; color: #334155; }
+        .container { max-width: 900px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        h2 { text-align: center; color: var(--primary); margin-bottom: 10px; }
+        .subtitle { text-align: center; color: #64748b; font-size: 0.9em; margin-bottom: 30px; }
+        
+        .vendor-info { background: #e0f2fe; padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #bae6fd; }
+        .vendor-info label { font-weight: bold; display: block; margin-bottom: 5px; }
+        .vendor-info input { width: 98%; padding: 10px; border: 1px solid #94a3b8; border-radius: 5px; font-size: 16px; }
+
+        .accordion { margin-bottom: 10px; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+        .accordion-header { 
+            background: #fff; padding: 15px 20px; cursor: pointer; font-weight: bold; 
+            display: flex; justify-content: space-between; align-items: center; transition: 0.2s;
+        }
+        .accordion-header:hover { background: #f8fafc; color: var(--primary); }
+        .accordion-header.active { background: var(--primary); color: white; }
+        .accordion-content { display: none; padding: 20px; background: #fff; border-top: 1px solid var(--border); }
+        .accordion-content.show { display: block; }
+
+        .checkbox-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; }
+        .checkbox-item { display: flex; align-items: center; padding: 8px; border-radius: 5px; border: 1px solid transparent; cursor: pointer; }
+        .checkbox-item:hover { background: #f1f5f9; }
+        .checkbox-item input { margin-right: 10px; transform: scale(1.2); cursor: pointer; }
+
+        .footer-actions { margin-top: 30px; text-align: center; border-top: 2px solid #e2e8f0; padding-top: 20px; }
+        button { padding: 15px 40px; font-size: 18px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; color: white; transition: 0.2s; }
+        .btn-submit { background: #0284c7; } 
+        .btn-submit:hover { background: #0369a1; }
+        .btn-submit:disabled { background: #ccc; cursor: not-allowed; }
+        
+        .select-all-btn { font-size: 12px; background: #e2e8f0; color: #333; padding: 5px 10px; border-radius: 4px; margin-left: 10px; }
+
+        .loader { border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; width: 20px; height: 20px; animation: spin 2s linear infinite; display: none; margin-left: 10px; vertical-align: middle; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>長照輔具供應項目調查表</h2>
+    <p class="subtitle">請勾選貴公司有提供的項目，完成後點擊「提交資料」。</p>
+    
+    <div class="vendor-info">
+        <label>廠商/公司名稱：</label>
+        <input type="text" id="vendorName" placeholder="請輸入貴公司名稱">
+    </div>
+
+    <div id="formContainer"></div>
+
+    <div class="footer-actions">
+        <button id="submitBtn" class="btn-submit" onclick="submitData()">
+            🚀 提交資料 <div class="loader" id="loader"></div>
+        </button>
+    </div>
+</div>
+
+<script>
+    // =======================================================================
+    // 步驟：請將下方引號 " " 中間的網址，換成您在 Google Apps Script 部署後取得的網址
+    // =======================================================================
+    
+    const scriptURL = "https://script.google.com/macros/s/AKfycbwYxmsTiN_I5G50rzFnbeiw55GBxeui0unNE1z6SQFVnivrB9jCNF6Z7AclrnVbJ1Hx/exec";
+
+    // =======================================================================
+    // ▲▲▲▲▲▲▲▲▲ 修改上面這一行就好 ▲▲▲▲▲▲▲▲▲
+    // =======================================================================
+
+    const ltcData = {
+        "輔具": [
+            "馬桶增高器及便盆椅或沐浴椅", "單支枴杖-不銹鋼製", "單支枴杖-鋁製", "助行器", "帶輪型助步車", 
+            "輪椅-A款（非輕量化量產型）", "輪椅-B款（輕量化量產型）", "輪椅-C款（量身訂製型）", 
+            "輪椅附加功能-A款（具利於移位功能）", "輪椅附加功能-B款（具仰躺功能）", "輪椅附加功能-C款（具空中傾倒功能）", 
+            "擺位系統-A款（平面型輪椅背靠）", "擺位系統-B款（曲面適形輪椅背靠）", "擺位系統-C款（輪椅軀幹側支撐架）", 
+            "擺位系統-D款（輪椅頭靠系統）", "電動輪椅（含加裝沙發型座椅、擺位型座椅、電動變換姿勢功能、或使用非比例式控制器）", 
+            "電動代步車", "移位腰帶", "移位板", "人力移位吊帶", "移位滑墊-A款", "移位滑墊-B款", "移位轉盤", 
+            "移位機（含移位機吊帶）", "移位機吊帶", "電話擴音器", "電話閃光震動器", "火警閃光警示器", 
+            "門鈴閃光器", "無線震動警示器", "衣著用輔具", "居家用生活輔具", "飲食用輔具", 
+            "氣墊床-A款", "氣墊床-B款", "輪椅座墊-A款（連通管型氣囊氣墊座-塑膠材質）", 
+            "輪椅座墊-B款（連通管型氣囊氣墊座-橡膠材質）", "輪椅座墊-C款（液態凝膠座墊）", 
+            "輪椅座墊-D款（固態凝膠座墊）", "輪椅座墊-E款（填充式氣囊氣墊座）", "輪椅座墊-F款（交替充氣型座墊）", 
+            "輪椅座墊-G款（量製型座墊）", "居家用照顧床", "居家用照顧床-附加功能A款（床面升降功能）", 
+            "居家用照顧床-附加功能B款（電動升降功能）"
+        ],
+        "居家無障礙環境改善服務": [
+            "居家無障礙環境改善-扶手", "居家無障礙環境改善-可動式扶手", "可攜式斜坡設備-非固定式斜坡板A款", 
+            "可攜式斜坡設備-非固定式斜坡板B款", "可攜式斜坡設備-非固定式斜坡板C款", "居家無障礙環境改善-固定式斜坡道", 
+            "居家無障礙環境改善-架高式和式地板拆除", "居家無障礙環境改善-反光貼條或消光", "居家無障礙環境改善-隔間", 
+            "居家無障礙環境改善-防滑措施", "居家無障礙環境改善-門A款", "居家無障礙環境改善-門B款", 
+            "居家無障礙環境改善-水龍頭", "居家無障礙環境改善-改善浴缸（新增、改換、移除-居家環境改善含原處填補）", 
+            "居家無障礙環境改善-改善洗臉台（槽）（新增、改換、移除-含原處填補）", 
+            "居家無障礙環境改善-改善馬桶（新增、改換、移除-含原處填補）", "居家無障礙環境改善-壁掛式淋浴椅（床）", 
+            "居家無障礙環境改善-改善流理台（新增、改換）", "居家無障礙環境改善-改善抽油煙機（位置調整）", 
+            "居家無障礙環境改善-特殊簡易洗槽", "居家無障礙環境改善-特殊簡易浴槽"
+        ],
+        "租賃": [
+            "帶輪型助步車(助行椅)", "輪椅-B款(輕量化量產型)", "輪椅附加功能-A款(具利於移位功能)", 
+            "輪椅附加功能-B款(具仰躺功能)", "輪椅附加功能-C款(具空中傾倒功能)", "電動輪椅", "電動代步車", 
+            "移位機", "氣墊床-A款", "氣墊床-B款", "居家用照顧床", "居家用照顧床-附加功能A款(床面升降功能)", 
+            "居家用照顧床-附加功能B款(電動升降功能)", "爬梯機(單趟)", "爬梯機(月)"
+        ]
+    };
+
+    const container = document.getElementById('formContainer');
+
+    // 產生選單
+    for (const [category, items] of Object.entries(ltcData)) {
+        const section = document.createElement('div');
+        section.className = 'accordion';
+        section.innerHTML = `
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+                <span>${category} <small>(${items.length}項)</small></span> 
+                <button class="select-all-btn" onclick="toggleSelectAll('${category}', event)">全選/取消</button>
+            </div>
+            <div class="accordion-content">
+                <div class="checkbox-grid">
+                    ${items.map(item => `<label class="checkbox-item"><input type="checkbox" name="${category}" value="${item}">${item}</label>`).join('')}
+                </div>
+            </div>`;
+        container.appendChild(section);
+    }
+
+    function toggleAccordion(header) {
+        header.classList.toggle('active');
+        header.nextElementSibling.classList.toggle('show');
+    }
+
+    function toggleSelectAll(category, event) {
+        event.stopPropagation();
+        const inputs = document.querySelectorAll(`input[name="${category}"]`);
+        let allChecked = Array.from(inputs).every(i => i.checked);
+        inputs.forEach(input => input.checked = !allChecked);
+    }
+
+    // 提交功能
+    function submitData() {
+        const vendorName = document.getElementById('vendorName').value.trim();
+        if(!vendorName) return alert("請填寫廠商名稱！");
+        
+        // 檢查使用者是否已經替換網址
+        if(scriptURL.includes("您的網址")) {
+            alert("⚠️ 設定尚未完成！\n\n請打開 html 檔案，找到 'const scriptURL' 這一行，\n並將網址換成您在 Google Apps Script 取得的網址。");
+            return;
+        }
+
+        let allItems = [];
+        document.querySelectorAll('input[type="checkbox"]:checked').forEach(cb => {
+            allItems.push(cb.value);
+        });
+
+        if(allItems.length === 0) return alert("您尚未勾選任何項目！");
+
+        const btn = document.getElementById('submitBtn');
+        const loader = document.getElementById('loader');
+        btn.disabled = true;
+        loader.style.display = 'inline-block';
+        btn.innerHTML = '資料傳送中... <div class="loader" style="display:inline-block"></div>';
+
+        const payload = JSON.stringify({
+            vendor: vendorName,
+            items: allItems.join('、')
+        });
+
+        fetch(scriptURL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'text/plain' },
+            body: payload
+        }).then(response => {
+            alert("✅ 提交成功！感謝您的填寫。");
+            window.location.reload();
+        }).catch(error => {
+            console.error('Error:', error);
+            alert("❌ 發生錯誤，請稍後再試。");
+            btn.disabled = false;
+            btn.innerHTML = '🚀 提交資料';
+        });
+    }
+</script>
+
+</body>
+</html>
