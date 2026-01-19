@@ -72,6 +72,31 @@
             margin-bottom: 0;
         }
 
+        .section-header {
+            background: #fef3c7;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #fcd34d;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .section-header label {
+            font-weight: bold;
+            color: #92400e;
+            font-size: 16px;
+        }
+
+        .required-hint {
+            color: #dc2626;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
         .accordion {
             margin-bottom: 10px;
             border: 1px solid var(--border);
@@ -239,10 +264,11 @@
                 <label>負責人身份證字號：</label>
                 <input type="text" id="contactId" placeholder="必填，英文字母+9位數字，例如：A123456789">
             </div>
-            <div class="form-row">
-                <label>提供身障輔具項目：</label>
-                <input type="text" id="disabilityItems" placeholder="必填，請輸入提供的身障輔具項目">
-            </div>
+        </div>
+
+        <div class="section-header">
+            <label>請選擇下面身障輔具項目（輔具、居家無障礙環境改善服務、租賃）：</label>
+            <span class="required-hint">* 必選至少一項</span>
         </div>
 
         <div id="formContainer"></div>
@@ -259,7 +285,7 @@
         // 步驟：請將下方引號 " " 中間的網址，換成您在 Google Apps Script 部署後取得的網址
         // =======================================================================
 
-        const scriptURL = "https://script.google.com/macros/s/AKfycbxLARHKw5PQQSLe9Mnc2cg7qvEbMLnp9dFYNBmZmdGbw1VZBATCcwJAhS_dNZVicEB5/exec";
+        const scriptURL = "https://script.google.com/macros/s/AKfycbwWSZsRZ7HUSl4-d5u5urAAY4bD_MXjlQkq9KDxPW15If1v0D90Mj4EvAWtUoQutQP5/exec";
 
         // =======================================================================
         // ▲▲▲▲▲▲▲▲▲ 修改上面這一行就好 ▲▲▲▲▲▲▲▲▲
@@ -379,7 +405,6 @@
             const address = document.getElementById('address').value.trim();
             const contactName = document.getElementById('contactName').value.trim();
             const contactId = document.getElementById('contactId').value.trim();
-            const disabilityItems = document.getElementById('disabilityItems').value.trim();
 
             // ====== 必填欄位驗證 ======
             if (!vendorName) return alert("請填寫「廠商/公司名稱」！");
@@ -390,7 +415,6 @@
             if (!address) return alert("請填寫「地址」！");
             if (!contactName) return alert("請填寫「負責人姓名」！");
             if (!contactId) return alert("請填寫「負責人身份證字號」！");
-            if (!disabilityItems) return alert("請填寫「提供身障輔具項目」！");
 
             // ====== 統一編號驗證（8位純數字）======
             if (!/^\d{8}$/.test(taxId)) {
@@ -441,7 +465,6 @@
                 address: address,
                 contactName: contactName,
                 contactId: contactId,
-                disabilityItems: disabilityItems,
                 items: allItems.join('、')
             });
 
