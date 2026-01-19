@@ -357,42 +357,10 @@
             inputs.forEach(input => input.checked = !allChecked);
         }
 
-        // 台灣身分證字號驗證函數
+        // 台灣身分證字號驗證函數（簡化版：大寫英文字母 + 9位數字）
         function validateTaiwanId(id) {
-            // 檢查格式：1個英文字母 + 9個數字
-            if (!/^[A-Za-z][12]\d{8}$/.test(id)) {
-                return false;
-            }
-
-            // 字母對應的數字表
-            const letterMap = {
-                'A': 10, 'B': 11, 'C': 12, 'D': 13, 'E': 14, 'F': 15, 'G': 16, 'H': 17,
-                'I': 34, 'J': 18, 'K': 19, 'L': 20, 'M': 21, 'N': 22, 'O': 35, 'P': 23,
-                'Q': 24, 'R': 25, 'S': 26, 'T': 27, 'U': 28, 'V': 29, 'W': 32, 'X': 30,
-                'Y': 31, 'Z': 33
-            };
-
-            const firstLetter = id.charAt(0).toUpperCase();
-            const letterValue = letterMap[firstLetter];
-            if (!letterValue) return false;
-
-            // 計算驗證碼
-            const n1 = Math.floor(letterValue / 10);
-            const n2 = letterValue % 10;
-
-            const weights = [1, 9, 8, 7, 6, 5, 4, 3, 2, 1];
-            const digits = [n1, n2];
-
-            for (let i = 1; i < 10; i++) {
-                digits.push(parseInt(id.charAt(i)));
-            }
-
-            let sum = 0;
-            for (let i = 0; i < digits.length; i++) {
-                sum += digits[i] * weights[i];
-            }
-
-            return sum % 10 === 0;
+            // 檢查格式：1個大寫英文字母 + 9個數字
+            return /^[A-Z]\d{9}$/.test(id.toUpperCase());
         }
 
         // 提交功能
